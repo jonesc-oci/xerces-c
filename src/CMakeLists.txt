@@ -1272,9 +1272,14 @@ add_library(xerces-c
   ${libxerces_c_SOURCES}
   ${libxerces_c_RESOURCES})
 
-target_include_directories(xerces-c BEFORE PUBLIC "$ENV{GNU_ICONV_ROOT}/include")
-list(APPEND libxerces_c_DEPS "$ENV{GNU_ICONV_ROOT}/lib/libiconv.so")
-add_definitions("-DICONV_INCLUDE=\"$ENV{GNU_ICONV_ROOT}/include/iconv.h\"")
+if(XERCES_OS_HAS_GNU_ICONV)
+  # Android APIs > 27 include libiconv
+  add_definitions("-DICONV_INCLUDE=\<iconv.h\>")
+else()
+  target_include_directories(xerces-c BEFORE PUBLIC "$ENV{GNU_ICONV_ROOT}/include")
+  list(APPEND libxerces_c_DEPS "$ENV{GNU_ICONV_ROOT}/lib/libiconv.so")
+  add_definitions("-DICONV_INCLUDE=\"$ENV{GNU_ICONV_ROOT}/include/iconv.h\"")
+endif()
 
 target_link_libraries(xerces-c ${libxerces_c_DEPS})
 if(XERCES_USE_NETACCESSOR_CURL)
